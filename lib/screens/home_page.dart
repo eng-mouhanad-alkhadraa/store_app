@@ -1,11 +1,15 @@
-//!  home_page فقط بملف ال refactor shared_preferences و curved_navigation_bar بدون
+//!   curved_navigation_bar مع اضافة ال  refactor shared_preferences
+//! يتم  حفظ و عرض تغييرات تحديث بيانات المنتج بالصفحة الرئيسية مباشرة بشكل سليم
 
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:store/models/product_model.dart';
-import 'package:store/widgets/custom_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:store/services/get_all_product_service.dart';
+import 'package:store/widgets/custom_card.dart';
+import 'package:store/widgets/custom_icon.dart';
+import 'package:store/widgets/shared_preferences.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
   static String id = 'HomePage';
@@ -25,16 +29,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<List<ProductModel>> getAllProducts() async {
     final products = await AllProductsService().getAllProducts();
-    final prefs = await SharedPreferences.getInstance();
     for (var product in products) {
-      final name = prefs.getString('product_${product.id}_name');
-      final desc = prefs.getString('product_${product.id}_desc');
-      final price = prefs.getString('product_${product.id}_price');
-      final image = prefs.getString('product_${product.id}_image');
-      if (name != null) product.updateTitle(name);
-      if (desc != null) product.updateDescription(desc);
-      if (price != null) product.updatePrice(double.parse(price!));
-      if (image != null) product.updateImage(image);
+      await SharedPreferencesHelper.loadProductFromPreferences(product);
     }
     return products;
   }
@@ -42,23 +38,35 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: Colors.white,
+        color: Colors.blueAccent.shade400,
+        animationDuration: Duration(milliseconds: 300),
+        onTap: (index) {
+          print('object');
+        },
+        items: [
+          CustomIcon(icon: Icons.home, color: Colors.white),
+          CustomIcon(icon: Icons.favorite, color: Colors.white),
+        ],
+      ),
       appBar: AppBar(
         actions: [
           IconButton(
             onPressed: () {},
             icon: Icon(
               FontAwesomeIcons.cartPlus,
-              color: Colors.black,
+              color: Colors.white,
             ),
           )
         ],
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blueAccent.shade400,
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'New Trend',
+          'Store App',
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
       ),
