@@ -1,5 +1,6 @@
 //!refactor shared_preferences
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:store/models/product_model.dart';
 import 'package:store/services/update_product.dart';
@@ -21,19 +22,32 @@ class _UpdateProductPageState extends State<UpdateProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    ProductModel product = ModalRoute.of(context)!.settings.arguments as ProductModel;
+    ProductModel product =
+        ModalRoute.of(context)!.settings.arguments as ProductModel;
 
     return ModalProgressHUD(
       inAsyncCall: isLoading,
       child: Scaffold(
         appBar: AppBar(
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  FontAwesomeIcons.edit,
+                  color: Colors.white,
+                ),
+              ),
+            )
+          ],
           title: Text(
             'Update Product',
             style: TextStyle(
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.blueAccent.shade400,
           elevation: 0,
           centerTitle: true,
         ),
@@ -80,12 +94,15 @@ class _UpdateProductPageState extends State<UpdateProductPage> {
                       isLoading = true;
                     });
                     try {
-                      if (productName != null) product.updateTitle(productName!);
+                      if (productName != null)
+                        product.updateTitle(productName!);
                       if (desc != null) product.updateDescription(desc!);
-                      if (price != null) product.updatePrice(double.parse(price!));
+                      if (price != null)
+                        product.updatePrice(double.parse(price!));
                       if (image != null) product.updateImage(image!);
                       await updateProduct(product);
-                      await SharedPreferencesHelper.saveProductToPreferences(product); // تحديث باستخدام SharedPreferencesHelper
+                      await SharedPreferencesHelper.saveProductToPreferences(
+                          product); // تحديث باستخدام SharedPreferencesHelper
                       if (mounted) {
                         Navigator.pop(context, 'updated');
                       }
@@ -116,7 +133,3 @@ class _UpdateProductPageState extends State<UpdateProductPage> {
     );
   }
 }
-
-
-
-

@@ -1,10 +1,13 @@
-//!   curved_navigation_bar مع اضافة ال  refactor shared_preferences
-//! يتم  حفظ و عرض تغييرات تحديث بيانات المنتج بالصفحة الرئيسية مباشرة بشكل سليم
+// //!   curved_navigation_bar مع اضافة ال  refactor shared_preferences  هام
+// //! يتم  حفظ و عرض تغييرات تحديث بيانات المنتج بالصفحة الرئيسية و صفحة تفاصيل المنتج مباشرة بشكل سليم
+// //!refactor shared_preferences  
+
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:store/models/product_model.dart';
+import 'package:store/screens/product_details_page.dart';
 import 'package:store/services/get_all_product_service.dart';
 import 'package:store/widgets/custom_card.dart';
 import 'package:store/widgets/custom_icon.dart';
@@ -52,11 +55,14 @@ class _HomePageState extends State<HomePage> {
       ),
       appBar: AppBar(
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              FontAwesomeIcons.cartPlus,
-              color: Colors.white,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: () {},
+              icon: Icon(
+                FontAwesomeIcons.cartPlus,
+                color: Colors.white,
+              ),
             ),
           )
         ],
@@ -76,7 +82,7 @@ class _HomePageState extends State<HomePage> {
           if (snapshot.hasData) {
             List<ProductModel> products = snapshot.data!;
             return Padding(
-              padding: const EdgeInsets.only(top: 100),
+              padding: const EdgeInsets.only(top: 100, bottom: 50),
               child: GridView.builder(
                 itemCount: products.length,
                 clipBehavior: Clip.none,
@@ -86,16 +92,29 @@ class _HomePageState extends State<HomePage> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 100,
                 ),
-                itemBuilder: (context, index) {
-                  return CustomCard(
-                    product: products[index],
-                    onEditComplete: () {
-                      setState(() {
-                        futureProducts = getAllProducts();
-                      });
-                    },
-                  );
-                },
+
+                // هو الذي  عندما نضغط  على المنتج يعرض صفحة التفاصيلitemBuilder
+              itemBuilder: (context, index) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailsPage(product: products[index]),
+        ),
+      );
+    },
+    child: CustomCard(
+      product: products[index],
+      onEditComplete: () {
+        setState(() {
+          futureProducts = getAllProducts();
+        });
+      },
+    ),
+  );
+},
+
               ),
             );
           } else {
@@ -108,3 +127,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
