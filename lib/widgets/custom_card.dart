@@ -1,19 +1,23 @@
-//!refactor shared_preferences   
+// //!refactor shared_preferences   
+
 import 'package:flutter/material.dart';
 import 'package:store/models/product_model.dart';
 import 'package:store/screens/update_product_page.dart';
-import 'custom_icon.dart';
-import 'shared_preferences.dart'; 
+import 'package:store/widgets/custom_icon.dart';
+import 'package:store/widgets/shared_preferences.dart';
+
 
 class CustomCard extends StatefulWidget {
   CustomCard({
     required this.product,
     required this.onEditComplete,
+    required this.onFavoriteUpdated,
     Key? key,
   }) : super(key: key);
 
   final ProductModel product;
   final VoidCallback onEditComplete;
+  final VoidCallback onFavoriteUpdated;
 
   @override
   _CustomCardState createState() => _CustomCardState();
@@ -38,6 +42,7 @@ class _CustomCardState extends State<CustomCard> {
   void toggleFavoriteStatus() async {
     isFavorite = !isFavorite;
     await SharedPreferencesHelper.setFavoriteStatus(widget.product.id.toString(), isFavorite);
+    widget.onFavoriteUpdated();
     setState(() {});
   }
 
@@ -109,23 +114,24 @@ class _CustomCardState extends State<CustomCard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                content: Text(r'$'
-                                    '${widget.product.price.toString()}'),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  content: Text(r'$' + widget.product.price.toString()),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              widget.product.price.toString().length > 6
+                                  ? r'$' + widget.product.price.toString().substring(0, 6) + '...'
+                                  : r'$' + widget.product.price.toString(),
+                              style: TextStyle(
+                                fontSize: 16,
                               ),
-                            );
-                          },
-                          child: Text(
-                            widget.product.price.toString().length > 6
-                                ? r'$'
-                                    '${widget.product.price.toString().substring(0, 6)}...'
-                                : r'$' '${widget.product.price.toString()}',
-                            style: TextStyle(
-                              fontSize: 16,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
@@ -133,11 +139,10 @@ class _CustomCardState extends State<CustomCard> {
                           children: [
                             CustomIcon(
                               color: Colors.red,
-                              icon: isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
+                              icon: isFavorite ? Icons.favorite : Icons.favorite_border,
                               onPressed: toggleFavoriteStatus,
                             ),
+                            SizedBox(width: 8),
                             CustomIcon(
                               color: Colors.blue,
                               icon: Icons.edit,
@@ -175,6 +180,3 @@ class _CustomCardState extends State<CustomCard> {
     );
   }
 }
- 
-
-

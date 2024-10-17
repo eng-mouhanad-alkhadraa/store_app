@@ -1,13 +1,13 @@
 // //!   curved_navigation_bar مع اضافة ال  refactor shared_preferences  هام
 // //! يتم  حفظ و عرض تغييرات تحديث بيانات المنتج بالصفحة الرئيسية و صفحة تفاصيل المنتج مباشرة بشكل سليم
-// //!refactor shared_preferences  
+// //!refactor shared_preferences
 
-
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:store/models/product_model.dart';
-import 'package:store/screens/product_details_page.dart';
+import 'package:store/screens/favorite_page.dart';
+import 'package:store/screens/product_details_page.dart'; // تأكد من استيراد صفحة تفاصيل المنتج
 import 'package:store/services/get_all_product_service.dart';
 import 'package:store/widgets/custom_card.dart';
 import 'package:store/widgets/custom_icon.dart';
@@ -15,6 +15,7 @@ import 'package:store/widgets/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
   static String id = 'HomePage';
 
   @override
@@ -23,11 +24,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<ProductModel>> futureProducts;
+  List<ProductModel> favoriteProducts = [];
 
   @override
   void initState() {
     super.initState();
     futureProducts = getAllProducts();
+    loadFavoriteProducts();
   }
 
   Future<List<ProductModel>> getAllProducts() async {
@@ -38,6 +41,18 @@ class _HomePageState extends State<HomePage> {
     return products;
   }
 
+  void loadFavoriteProducts() async {
+    final products = await getAllProducts();
+    for (var product in products) {
+      final isFavorite = await SharedPreferencesHelper.getFavoriteStatus(
+          product.id.toString());
+      if (isFavorite) {
+        favoriteProducts.add(product);
+      }
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +61,14 @@ class _HomePageState extends State<HomePage> {
         color: Colors.blueAccent.shade400,
         animationDuration: Duration(milliseconds: 300),
         onTap: (index) {
-          print('object');
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      FavoritePage(products: favoriteProducts)),
+            );
+          }
         },
         items: [
           CustomIcon(icon: Icons.home, color: Colors.white),
@@ -92,29 +114,31 @@ class _HomePageState extends State<HomePage> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 100,
                 ),
+                //! هو الذي  عندما نضغط  على المنتج يعرض صفحة التفاصيلitemBuilder
 
-                // هو الذي  عندما نضغط  على المنتج يعرض صفحة التفاصيلitemBuilder
-              itemBuilder: (context, index) {
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProductDetailsPage(product: products[index]),
-        ),
-      );
-    },
-    child: CustomCard(
-      product: products[index],
-      onEditComplete: () {
-        setState(() {
-          futureProducts = getAllProducts();
-        });
-      },
-    ),
-  );
-},
-
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ProductDetailsPage(product: products[index]),
+                        ),
+                      );
+                    },
+                    child: CustomCard(
+                      product: product,
+                      onEditComplete: () {
+                        setState(() {
+                          futureProducts = getAllProducts();
+                        });
+                      },
+                      onFavoriteUpdated: loadFavoriteProducts,
+                    ),
+                  );
+                },
               ),
             );
           } else {
@@ -127,4 +151,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-

@@ -1,4 +1,3 @@
-//! الاساسي
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:store/models/product_model.dart';
 
@@ -17,7 +16,7 @@ class SharedPreferencesHelper {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('product_${product.id}_name', product.title);
     await prefs.setString('product_${product.id}_desc', product.description);
-    await prefs.setString('product_${product.id}_price', product.price.toString()); // تأكد من تحويل السعر إلى نص
+    await prefs.setString('product_${product.id}_price', product.price.toString());
     await prefs.setString('product_${product.id}_image', product.image);
   }
 
@@ -27,14 +26,24 @@ class SharedPreferencesHelper {
     final desc = prefs.getString('product_${product.id}_desc');
     final price = prefs.getString('product_${product.id}_price');
     final image = prefs.getString('product_${product.id}_image');
-
     if (name != null) product.updateTitle(name);
     if (desc != null) product.updateDescription(desc);
-    if (price != null) product.updatePrice(double.parse(price!)); // تحويل السعر من نص إلى رقم
+    if (price != null) product.updatePrice(double.parse(price!));
     if (image != null) product.updateImage(image);
   }
+
+  static Future<List<ProductModel>> getFavoriteProducts(List<ProductModel> allProducts) async {
+    final favoriteProducts = <ProductModel>[];
+    for (var product in allProducts) {
+      final isFavorite = await getFavoriteStatus(product.id.toString());
+      if (isFavorite) {
+        favoriteProducts.add(product);
+      }
+    }
+    return favoriteProducts;
+  }
+
+  static Future<void> updateProductInPreferences(ProductModel product) async {
+    await saveProductToPreferences(product);
+  }
 }
-
-
-
-

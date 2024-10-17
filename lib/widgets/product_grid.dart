@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:store/models/product_model.dart';
 import 'package:store/widgets/custom_card.dart';
-import 'package:store/widgets/shared_preferences.dart';
 
 class ProductGrid extends StatefulWidget {
   final Future<List<ProductModel>> futureProducts;
   final VoidCallback onEditComplete;
+  final VoidCallback onFavoriteUpdated; // إضافة المعامل
 
   ProductGrid({
     required this.futureProducts,
     required this.onEditComplete,
+    required this.onFavoriteUpdated, // إضافة المعامل
   });
 
   @override
@@ -54,6 +55,7 @@ class _ProductGridState extends State<ProductGrid> {
                     });
                     widget.onEditComplete();
                   },
+                  onFavoriteUpdated: widget.onFavoriteUpdated, // تمرير المعامل
                 );
               },
             ),
@@ -67,6 +69,5 @@ class _ProductGridState extends State<ProductGrid> {
     );
   }
 }
-
 
 
